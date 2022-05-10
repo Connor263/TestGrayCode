@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">TestGrayCode</string>
+    <string name="apps_dev_key">EPKgt6JzUDDguq83xCex8n</string>
+    <string name="one_signal_key">b89a884e-1331-4cfc-896d-5ae1b6ad6e4b</string>
+    <string name="config_key">root_url</string>
+
+    <string name="facebook_app_id">947548852589321</string>
+    <string name="facebook_token">a170b55a601ae3cb3b59a32c0fa9894f</string>
+</resources>
