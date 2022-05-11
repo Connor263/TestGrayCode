@@ -13,6 +13,7 @@ data class MainLink(
     var afChannel: String? = null,
     var campaign: String? = null,
     var url: String? = null,
+    var organicAccess:Boolean? = null
 ) {
 
     fun collectLink(context: Context): String {

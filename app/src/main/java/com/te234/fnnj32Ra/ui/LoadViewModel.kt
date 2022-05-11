@@ -22,6 +22,9 @@ class LoadViewModel : ViewModel() {
         return appStorage.getLink(context)
     }
 
+    fun getMediaSourceAndOrganic(): Pair<String?, Boolean?> {
+        return mainLink.mediaSource to mainLink.organicAccess
+    }
 
     fun setGoogleID(googleId: String) {
         mainLink.googleId = googleId
@@ -29,8 +32,9 @@ class LoadViewModel : ViewModel() {
         Log.e("googleId", googleId)
     }
 
-    fun setUrl(url: String) {
+    fun setUrlAndOrganic(url: String, organicAccess: Boolean) {
         mainLink.url = url
+        mainLink.organicAccess = organicAccess
     }
 
     fun setDeepLink(targetUri: Uri?) {

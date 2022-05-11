@@ -3,7 +3,6 @@ package com.te234.fnnj32Ra.ui
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -159,8 +158,9 @@ class LoadFragment : Fragment() {
         firebaseConfig.setConfigSettingsAsync(firebaseConfigSettings)
 
         firebaseConfig.fetchAndActivate().addOnCompleteListener {
-            val url = firebaseConfig.getString(getString(R.string.config_key))
-            viewModel.setUrl(url)
+            val url = firebaseConfig.getString(getString(R.string.config_key_url))
+            val organicAccess = firebaseConfig.getBoolean(getString(R.string.config_key_organic))
+            viewModel.setUrlAndOrganic(url, organicAccess)
             if (url.contains("http")) {
                 startWork()
             } else {
@@ -218,6 +218,15 @@ class LoadFragment : Fragment() {
                         Log.d("TAG", "getAppsFlyerParams af_channel: ${inform.value}")
                     }
                 }
+            }
+
+
+            val pair = viewModel.getMediaSourceAndOrganic()
+            if (pair.first == "Organic" && pair.second == false) {
+                Intent(requireContext(), GameActivity::class.java).run {
+                    startActivity(this)
+                }
+                return@observe
             }
             collectLink()
         }
