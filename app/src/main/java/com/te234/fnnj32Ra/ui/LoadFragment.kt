@@ -78,7 +78,11 @@ class LoadFragment : Fragment() {
         Log.d("TAG", "getCachedLink: $link")
 
         if (checkForInternet(requireContext())) {
-            if (link != "") loadWebView(link) else setupBinomKeyJoeJol()
+            if (link != "") {
+                loadWebView(link)
+            } else {
+                setupBinomKeyJoeJol()
+            }
         } else {
             showNoInternetConnectionDialog()
             binding.pBar.visibility = View.GONE
@@ -103,9 +107,12 @@ class LoadFragment : Fragment() {
             cacheMode = WebSettings.LOAD_DEFAULT
         }
         webViewClient = object : WebViewClient() {
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                super.onPageStarted(view, url, favicon)
-                binding.pBar.visibility = View.GONE
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                if (url!!.contains("error=appafAs3f") || url.contains("disabled.html")) {
+                    Log.e("TAG", "Bot")
+                    startActivity(Intent(requireContext(), GameActivity::class.java))
+                }
             }
         }
         webChromeClient = object : WebChromeClient() {
@@ -123,6 +130,8 @@ class LoadFragment : Fragment() {
             }
         }
         clearCache(false)
+
+        binding.pBar.visibility = View.GONE
         loadUrl(link)
         Log.d("TAG", "loadWebView: $link")
         //loadUrl("google.com")
