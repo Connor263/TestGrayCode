@@ -91,6 +91,17 @@ class LoadFragment : Fragment() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun loadWebView(link: String) = with(binding.webView) {
+        val pair = viewModel.getMediaSourceAndOrganic()
+        val mediaSource = pair.first
+        val organicAccess = pair.second
+
+        Log.d("TAG", "loadWebView: MediaSource:$mediaSource \nOrganic Access:$organicAccess")
+        if (mediaSource == "organic" && organicAccess == false) {
+            Intent(requireContext(), GameActivity::class.java).run {
+                startActivity(this)
+            }
+            return@with
+        }
         CookieManager.getInstance().apply {
             setAcceptCookie(true)
             setAcceptThirdPartyCookies(this@with, true)
@@ -220,14 +231,6 @@ class LoadFragment : Fragment() {
                 }
             }
 
-
-            val pair = viewModel.getMediaSourceAndOrganic()
-            if (pair.first == "Organic" && pair.second == false) {
-                Intent(requireContext(), GameActivity::class.java).run {
-                    startActivity(this)
-                }
-                return@observe
-            }
             collectLink()
         }
     }
