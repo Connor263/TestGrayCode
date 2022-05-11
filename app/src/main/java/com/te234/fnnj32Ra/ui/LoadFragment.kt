@@ -24,6 +24,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
 import com.te234.fnnj32Ra.GameActivity
+import com.te234.fnnj32Ra.MainActivity
 import com.te234.fnnj32Ra.R
 import com.te234.fnnj32Ra.databinding.FragmentLoadBinding
 import com.te234.fnnj32Ra.di.MainApplication
@@ -110,7 +111,10 @@ class LoadFragment : Fragment() {
                 super.onPageFinished(view, url)
                 if (url!!.contains("error=appafAs3f") || url.contains("disabled.html")) {
                     Log.e("TAG", "Bot")
-                    startActivity(Intent(requireContext(), GameActivity::class.java))
+                    Intent(requireContext(), GameActivity::class.java).run {
+                        startActivity(this)
+                        (requireActivity() as MainActivity).finish()
+                    }
                 }
             }
         }
@@ -228,6 +232,7 @@ class LoadFragment : Fragment() {
             if (mediaSource == "organic" && organicAccess == false) {
                 Intent(requireContext(), GameActivity::class.java).run {
                     startActivity(this)
+                    (requireActivity() as MainActivity).finish()
                 }
                 return@observe
             }
