@@ -3,6 +3,7 @@ package com.te234.fnnj32Ra.ui
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -10,18 +11,20 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.*
-import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.appsflyer.AppsFlyerLib
 import com.facebook.FacebookSdk
 import com.facebook.applinks.AppLinkData
 import com.google.android.gms.ads.identifier.AdvertisingIdClient
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings
+import com.te234.fnnj32Ra.GameActivity
 import com.te234.fnnj32Ra.R
 import com.te234.fnnj32Ra.databinding.FragmentLoadBinding
 import com.te234.fnnj32Ra.di.MainApplication
@@ -33,7 +36,7 @@ class LoadFragment : Fragment() {
     private var _binding: FragmentLoadBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: LoadViewModel by viewModels()
+    private val viewModel: LoadViewModel by activityViewModels()
 
     private var fileData: ValueCallback<Uri>? = null
     private var filePath: ValueCallback<Array<Uri>>? = null
@@ -61,20 +64,25 @@ class LoadFragment : Fragment() {
                 }
             }
         })
+        initLoading()
+    }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun initLoading() {
+        binding.pBar.visibility = View.VISIBLE
         val link = viewModel.getLink(requireContext())
         Log.d("TAG", "getCachedLink: $link")
 
         if (checkForInternet(requireContext())) {
             if (link != "") loadWebView(link) else setupBinomKeyJoeJol()
         } else {
-            Toast.makeText(requireContext(), "No internet", Toast.LENGTH_SHORT).show()
+            showNoInternetConnectionDialog()
+            binding.pBar.visibility = View.GONE
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
 
@@ -94,7 +102,12 @@ class LoadFragment : Fragment() {
             loadWithOverviewMode = true
             cacheMode = WebSettings.LOAD_DEFAULT
         }
-        webViewClient = WebViewClient()
+        webViewClient = object : WebViewClient() {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+                binding.pBar.visibility = View.GONE
+            }
+        }
         webChromeClient = object : WebChromeClient() {
             override fun onShowFileChooser(
                 webView: WebView?, filePathCallback: ValueCallback<Array<Uri>>?,
@@ -111,6 +124,7 @@ class LoadFragment : Fragment() {
         }
         clearCache(false)
         loadUrl(link)
+        Log.d("TAG", "loadWebView: $link")
         //loadUrl("google.com")
     }
 
@@ -140,24 +154,28 @@ class LoadFragment : Fragment() {
             viewModel.setUrl(url)
             if (url.contains("http")) {
                 startWork()
+            } else {
+                Intent(requireContext(), GameActivity::class.java).run {
+                    startActivity(this)
+                }
             }
             Log.d("TAG", "setupBinomKeyJoeJol: $url")
         }
     }
 
     private fun startWork() = lifecycleScope.launch(Dispatchers.IO) {
-        getGoogleID()
-        startInitFB()
-        lifecycleScope.launch(Dispatchers.Main) {
+        lifecycleScope.launch(Dispatchers.Main.immediate) {
             getAppsFlyerParams()
         }
+        getGoogleID()
+        startInitFB()
     }
 
     private fun startInitFB() {
         FacebookSdk.setAutoInitEnabled(true)
         FacebookSdk.fullyInitialize()
         AppLinkData.fetchDeferredAppLinkData(requireContext()) {
-            val targetUri = it?.targetUri.toString()
+            val targetUri = it?.targetUri
             viewModel.setDeepLink(targetUri)
         }
     }
@@ -175,16 +193,20 @@ class LoadFragment : Fragment() {
             for (inform in it) {
                 when (inform.key) {
                     "af_status" -> {
-                        viewModel.AppsFlyerParamSetup().afStatus(inform.value.toString())
+                        viewModel.afStatus(inform.value.toString())
+                        Log.d("TAG", "getAppsFlyerParams af_status: ${inform.value}")
                     }
                     "campaign" -> {
-                        viewModel.AppsFlyerParamSetup().campaign(inform.value.toString())
+                        viewModel.campaign(inform.value.toString())
+                        Log.d("TAG", "getAppsFlyerParams campaign: ${inform.value}")
                     }
                     "media_source" -> {
-                        viewModel.AppsFlyerParamSetup().mediaSource(inform.value.toString())
+                        viewModel.mediaSource(inform.value.toString())
+                        Log.d("TAG", "getAppsFlyerParams media_source: ${inform.value}")
                     }
                     "af_channel" -> {
-                        viewModel.AppsFlyerParamSetup().afChannel(inform.value.toString())
+                        viewModel.afChannel(inform.value.toString())
+                        Log.d("TAG", "getAppsFlyerParams af_channel: ${inform.value}")
                     }
                 }
             }
@@ -196,4 +218,15 @@ class LoadFragment : Fragment() {
         val mainLink = viewModel.saveLink(requireContext())
         loadWebView(mainLink)
     }
+
+
+    private fun showNoInternetConnectionDialog(): AlertDialog =
+        MaterialAlertDialogBuilder(requireContext()).setTitle("No internet connection")
+            .setMessage("Check your internet connection and try again later")
+            .setCancelable(false)
+            .setPositiveButton("Try again") { dialog, _ ->
+                initLoading()
+                dialog.dismiss()
+            }
+            .show()
 }

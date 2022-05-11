@@ -1,6 +1,7 @@
 package com.te234.fnnj32Ra.di
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.appsflyer.AppsFlyerConversionListener
 import com.appsflyer.AppsFlyerLib
@@ -28,9 +29,13 @@ class MainApplication : Application() {
                 }
             }
 
-            override fun onConversionDataFail(error: String?) {}
+            override fun onConversionDataFail(error: String?) {
+                Log.d("TAG", "onConversionDataFail: $error")
+            }
             override fun onAppOpenAttribution(data: MutableMap<String, String>?) {}
-            override fun onAttributionFailure(error: String?) {}
+            override fun onAttributionFailure(error: String?) {
+                Log.d("TAG", "onAttributionFailure: $error")
+            }
         }
     }
 

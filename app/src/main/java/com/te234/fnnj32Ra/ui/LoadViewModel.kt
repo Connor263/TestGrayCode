@@ -1,6 +1,7 @@
 package com.te234.fnnj32Ra.ui
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import com.onesignal.OneSignal
@@ -32,12 +33,15 @@ class LoadViewModel : ViewModel() {
         mainLink.url = url
     }
 
-    fun setDeepLink(targetUri: String) {
-        mainLink.deepLink = targetUri
-        mainLink.deepLink?.let { deepString ->
-            val arrayDeepLink = deepString.split("//")
+    fun setDeepLink(targetUri: Uri?) {
+        mainLink.deepLink = targetUri?.toString()
+        Log.d("TAG", "setDeepLink deepLink: $targetUri")
+
+        mainLink.deepLink?.let {
+            val arrayDeepLink = it.split("//")
             mainLink.subAll = arrayDeepLink[1].split("_")
-            Log.d("TAG", "setDeepLink: $deepString")
+
+            Log.d("TAG", "setDeepLink subAll: ${mainLink.subAll}")
         }
     }
 
@@ -46,27 +50,25 @@ class LoadViewModel : ViewModel() {
     }
 
 
-    inner class AppsFlyerParamSetup {
-
-        fun afStatus(value: String) {
-            if (value == "Organic" && mainLink.deepLink == null) {
-                mainLink.mediaSource = "organic"
-            }
+    fun afStatus(value: String) {
+        Log.d("TAG", "afStatus value: $value")
+        if (value == "Organic" && mainLink.deepLink == null) {
+            mainLink.mediaSource = "organic"
         }
+    }
 
-        fun campaign(value: String) {
-            mainLink.campaign = value
-            mainLink.campaign?.let {
-                mainLink.subAll = it.split("_")
-            }
+    fun campaign(value: String) {
+        mainLink.campaign = value
+        mainLink.campaign?.let {
+            mainLink.subAll = it.split("_")
         }
+    }
 
-        fun mediaSource(value: String) {
-            mainLink.mediaSource = value
-        }
+    fun mediaSource(value: String) {
+        mainLink.mediaSource = value
+    }
 
-        fun afChannel(value: String) {
-            mainLink.afChannel = value
-        }
+    fun afChannel(value: String) {
+        mainLink.afChannel = value
     }
 }
